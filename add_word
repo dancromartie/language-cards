@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+word_file=$(mktemp new_word.XXXX)
+epoch=$(date '+%s')
+tomorrow=$(($epoch + 1))
+#tomorrow=$(date -d 'tomorrow' '+%s')
+cat << EOF > $word_file
+----------------------------------------
+id: $epoch
+foreign:
+english:
+notes:
+EOF
+vim $word_file
+cat $word_file >> words
+rm $word_file
+cat << EOF >> due_dates
+$epoch $tomorrow
+EOF
