@@ -47,9 +47,16 @@ def main():
         print("Card id: %s" % due_id)
         card = get_card_by_id(cards, due_id)
         print("Foreign: %s" % card["foreign"])
-        num_days = int(input("In how many seconds would you like to see this again?: "))
+        valid_response = False
+        while not valid_response:
+            response = input("In how many days would you like to see this again?: ")
+            if response == "a":
+                print(card["english"])
+            else:
+                num_days = int(response)
+                valid_response = True
         assert 0 <= num_days <= 100
-        due_epoch = int(time.time()) + int(num_days) * 1
+        due_epoch = int(time.time()) + int(num_days) * 86400
         add_due_date_to_file(due_id, due_epoch)
 
 
