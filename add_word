@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-word_file=$(mktemp new_word.XXXX)
+word_file=$(mktemp /tmp/new_word.XXXX)
 epoch=$(date '+%s')
 tomorrow=$(($epoch + 86400))
 
