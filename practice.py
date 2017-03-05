@@ -52,6 +52,7 @@ def main():
             response = input("In how many days would you like to see this again?: ")
             if response == "a":
                 print(card["english"])
+                print(card["notes"])
             else:
                 num_days = int(response)
                 valid_response = True
