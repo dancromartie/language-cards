@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+vocab_file=$1
+if ! [ -f "$vocab_file" ]
+then
+    echo "$vocab_file is not a file!" && exit 1
+fi
 word_file=$(mktemp /tmp/new_word.XXXX)
 epoch=$(date '+%s')
 tomorrow=$(($epoch + 86400))
@@ -19,13 +24,14 @@ then
     echo "Aborting due to badly formatted english" && exit 1
 fi
 
-if ! egrep -q 'foreign: ?\w' $word_file
+# Just check for something not-a-space, since foreign characters don't seem to match \w
+if ! egrep -q 'foreign: ?[^ ]' $word_file
 then
     echo "Aborting due to badly formatted foreign" && exit 1
 fi
 
 
-cat $word_file >> words
+cat $word_file >> $vocab_file
 rm $word_file
 cat << EOF >> due_dates
 $epoch $tomorrow

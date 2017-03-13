@@ -1,16 +1,18 @@
 import csv
 import re
 import subprocess
+import sys
 import time
 
-def find_due_cards():
+def find_due_cards(card_ids):
     due_cards = []
     current_epoch = int(time.time())
     with open("due_dates") as f_in:
         reader = csv.reader(f_in, delimiter=" ")
         for row in reader:
             if int(row[1]) < current_epoch:
-                due_cards.append(row[0])
+                if row[0] in card_ids:
+                    due_cards.append(row[0])
     return due_cards
 
 
@@ -41,8 +43,10 @@ def add_due_date_to_file(due_id, due_epoch):
 
 
 def main():
-    due_ids = find_due_cards()
-    cards = from_cookie_jar("words")
+    words_file_path = sys.argv[1]
+    cards = from_cookie_jar(words_file_path)
+    card_ids = [x["id"] for x in cards]
+    due_ids = find_due_cards(card_ids)
     for due_id in due_ids:
         print("Card id: %s" % due_id)
         card = get_card_by_id(cards, due_id)
