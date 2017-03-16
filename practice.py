@@ -1,4 +1,5 @@
 import csv
+import random
 import re
 import subprocess
 import sys
@@ -50,12 +51,19 @@ def main():
     for due_id in due_ids:
         print("Card id: %s" % due_id)
         card = get_card_by_id(cards, due_id)
-        print("Foreign: %s" % card["foreign"])
+        direction = random.choice(["f_to_e", "e_to_f"])
+        if direction == "f_to_e":
+            print("Foreign: %s" % card["foreign"])
+        else:
+            print("English: %s" % card["english"])
         valid_response = False
         while not valid_response:
             response = input("In how many days would you like to see this again?: ")
             if response == "a":
-                print(card["english"])
+                if direction == "f_to_e":
+                    print(card["english"])
+                else:
+                    print(card["foreign"])
                 print(card["notes"])
             else:
                 num_days = int(response)
