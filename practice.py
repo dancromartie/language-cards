@@ -46,12 +46,14 @@ def add_due_date_to_file(due_id, due_epoch):
 def main():
     words_file_path = sys.argv[1]
     cards = from_cookie_jar(words_file_path)
-    card_ids = [x["id"] for x in cards]
-    due_ids = find_due_cards(card_ids)
+    candidate_ids = ["e_to_f" + x["id"] for x in cards]
+    candidate_ids += ["f_to_e" + x["id"] for x in cards]
+    due_ids = find_due_cards(candidate_ids)
     for due_id in due_ids:
-        print("Card id: %s" % due_id)
-        card = get_card_by_id(cards, due_id)
-        direction = random.choice(["f_to_e", "e_to_f"])
+        base_id = re.sub("\w_to_\w", "", due_id)
+        print("Due id: %s, Base id: %s" % (due_id, base_id))
+        direction = re.search("(\w_to_\w)", due_id).group(1)
+        card = get_card_by_id(cards, base_id)
         if direction == "f_to_e":
             print("Foreign: %s" % card["foreign"])
         else:
@@ -65,6 +67,9 @@ def main():
                 else:
                     print(card["foreign"])
                 print(card["notes"])
+            elif re.search("\D", response):
+                print("Bad characters")
+                continue
             else:
                 num_days = int(response)
                 valid_response = True
