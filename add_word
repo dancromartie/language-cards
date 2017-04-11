@@ -34,6 +34,6 @@ fi
 cat $word_file >> $vocab_file
 rm $word_file
 cat << EOF >> due_dates
-e_to_f$epoch $tomorrow
-f_to_e$epoch $tomorrow
+e_to_f$epoch $tomorrow 1
+f_to_e$epoch $tomorrow 1
 EOF

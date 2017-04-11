@@ -13,7 +13,16 @@ def find_due_cards(card_ids):
         for row in reader:
             if int(row[1]) < current_epoch:
                 if row[0] in card_ids:
-                    due_cards.append(row[0])
+                    interval = None
+                    # TODO interval is new feature.  unwind once all cards have this
+                    if len(row) > 2:
+                       interval = int(row[2])
+                    card = {
+                        "id": row[0],
+                        "due_date": row[1],
+                        "interval": interval
+                    }
+                    due_cards.append(card)
     return due_cards
 
 
@@ -37,8 +46,8 @@ def get_card_by_id(cards, card_id):
     return matches[0]
 
 
-def add_due_date_to_file(due_id, due_epoch):
-    due_date_string = "%s %s\n" % (due_id, due_epoch)
+def add_due_date_to_file(due_id, due_epoch, interval):
+    due_date_string = "%s %s %s\n" % (due_id, due_epoch, interval)
     with open("due_dates", "a") as f_out:
         f_out.write(due_date_string)
 
@@ -48,34 +57,48 @@ def main():
     cards = from_cookie_jar(words_file_path)
     candidate_ids = ["e_to_f" + x["id"] for x in cards]
     candidate_ids += ["f_to_e" + x["id"] for x in cards]
-    due_ids = find_due_cards(candidate_ids)
-    for due_id in due_ids:
+    due_cards = find_due_cards(candidate_ids)
+    random.shuffle(due_cards)
+    word_counter = 0
+    for due_card in due_cards:
+        word_counter += 1
+        due_id = due_card["id"]
         base_id = re.sub("\w_to_\w", "", due_id)
-        print("Due id: %s, Base id: %s" % (due_id, base_id))
+        print("Word %s of %s" % (word_counter, len(due_cards)))
+        print("Due id: %s, Base id: %s, Interval: %s" % (due_id, base_id, due_card["interval"]))
         direction = re.search("(\w_to_\w)", due_id).group(1)
-        card = get_card_by_id(cards, base_id)
+        # "due_card" so far was just from the practice logs,
+        # This is the full fetch now.
+        full_card = get_card_by_id(cards, base_id)
         if direction == "f_to_e":
-            print("Foreign: %s" % card["foreign"])
+            print("Foreign: %s" % full_card["foreign"])
         else:
-            print("English: %s" % card["english"])
-        valid_response = False
-        while not valid_response:
-            response = input("In how many days would you like to see this again?: ")
+            print("English: %s" % full_card["english"])
+
+        interval = due_card["interval"]
+        assert interval is None or interval < 300
+
+        practice_in_x_days = None
+        while not practice_in_x_days:
+            response = input("Enter an interval for this card:")
             if response == "a":
                 if direction == "f_to_e":
-                    print(card["english"])
+                    print(full_card["english"])
                 else:
-                    print(card["foreign"])
-                print(card["notes"])
-            elif re.search("\D", response):
+                    print(full_card["foreign"])
+                print(full_card["notes"])
+            elif re.match("^\d+$", response):
+                practice_in_x_days = int(response)
+                interval = practice_in_x_days
+            elif re.match("^r?i\d+$", response):
+                interval += int(interval + response.count("i"))
+                practice_in_x_days = interval
+            else:
                 print("Bad characters")
                 continue
-            else:
-                num_days = int(response)
-                valid_response = True
-        assert 0 <= num_days <= 100
-        due_epoch = int(time.time()) + int(num_days) * 86400
-        add_due_date_to_file(due_id, due_epoch)
+        assert 0 <= practice_in_x_days <= 100
+        due_epoch = int(time.time()) + int(practice_in_x_days) * 86400
+        add_due_date_to_file(due_id, due_epoch, interval)
 
 
 def clean_due_dates():
