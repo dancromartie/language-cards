@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+cat "$@" | python sub_epochs.py |
+    egrep -o '\d\d\d\d-\d\d-\d\d' | sort | uniq -c
