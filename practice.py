@@ -90,7 +90,7 @@ def main():
             elif re.match("^\d+$", response):
                 practice_in_x_days = int(response)
                 interval = practice_in_x_days
-            elif re.match("^r?i\d+$", response):
+            elif re.match("^r?i+$", response):
                 interval += int(interval + response.count("i"))
                 practice_in_x_days = interval
             else:
