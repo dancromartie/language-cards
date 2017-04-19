@@ -87,10 +87,13 @@ def main():
                 else:
                     print(full_card["foreign"])
                 print(full_card["notes"])
-            elif re.match("^\d+$", response):
-                practice_in_x_days = int(response)
+            elif re.match(r"^r?\d+$", response):
+                practice_in_x_days = int(response.replace("r", ""))
                 interval = practice_in_x_days
-            elif re.match("^r?i+$", response):
+            elif re.match(r"^r?i+$", response):
+                if interval is None:
+                    print("cant add to interval of None")
+                    continue
                 interval += int(interval + response.count("i"))
                 practice_in_x_days = interval
             else:
