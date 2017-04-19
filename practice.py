@@ -52,7 +52,16 @@ def add_due_date_to_file(due_id, due_epoch, interval):
         f_out.write(due_date_string)
 
 
+def estimate_remaining_time(start_epoch, num_completed, num_total):
+    current_epoch = int(time.time())
+    seconds_elapsed = current_epoch - start_epoch
+    seconds_per = seconds_elapsed * 1.0 / num_completed
+    estimated_seconds = seconds_elapsed + seconds_per * (num_total - num_completed)
+    return estimated_seconds / 60
+
+
 def main():
+    start_epoch = int(time.time())
     words_file_path = sys.argv[1]
     cards = from_cookie_jar(words_file_path)
     candidate_ids = ["e_to_f" + x["id"] for x in cards]
@@ -64,6 +73,10 @@ def main():
         word_counter += 1
         due_id = due_card["id"]
         base_id = re.sub("\w_to_\w", "", due_id)
+        if word_counter > 1:
+            remaining_time_estimate = estimate_remaining_time(
+                start_epoch, word_counter - 1, len(due_cards))
+            print("Estimated total practice time: %.1f mins" % remaining_time_estimate)
         print("Word %s of %s" % (word_counter, len(due_cards)))
         print("Due id: %s, Base id: %s, Interval: %s" % (due_id, base_id, due_card["interval"]))
         direction = re.search("(\w_to_\w)", due_id).group(1)
