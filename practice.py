@@ -52,6 +52,11 @@ def add_due_date_to_file(due_id, due_epoch, interval):
         f_out.write(due_date_string)
 
 
+def log_answer(due_id, interval):
+    with open("drill_log.txt", "a") as f_out:
+        f_out.write("%s,%s,%s\n" % (due_id, int(time.time()), interval))
+
+
 def estimate_remaining_time(start_epoch, num_completed, num_total):
     current_epoch = int(time.time())
     seconds_elapsed = current_epoch - start_epoch
@@ -115,6 +120,7 @@ def main():
         assert 0 <= practice_in_x_days <= 100
         due_epoch = int(time.time()) + int(practice_in_x_days) * 86400
         add_due_date_to_file(due_id, due_epoch, interval)
+        log_answer(due_id, interval)
 
 
 def clean_due_dates():
