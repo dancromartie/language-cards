@@ -114,6 +114,9 @@ def main():
                     continue
                 interval += int(interval + response.count("i"))
                 practice_in_x_days = interval
+            elif response == "w":
+                interval = 1
+                practice_in_x_days = interval
             else:
                 print("Bad characters")
                 continue
