@@ -1,9 +1,13 @@
+import collections
 import csv
 import random
 import re
 import subprocess
 import sys
 import time
+
+import util
+
 
 def find_due_cards(card_ids):
     due_cards = []
@@ -24,20 +28,6 @@ def find_due_cards(card_ids):
                     }
                     due_cards.append(card)
     return due_cards
-
-
-def from_cookie_jar(path):
-    cookies = []
-    file_text = open(path).read()
-    chunks = re.split("-{40}", file_text)
-    chunks = [x.strip() for x in chunks if x.strip()]
-    for chunk in chunks:
-        chunk_dict = {}
-        for line in chunk.split("\n"):
-            field, val = [x.strip() for x in line.split(":", 1)]
-            chunk_dict[field] = val
-        cookies.append(chunk_dict)
-    return cookies
 
 
 def get_card_by_id(cards, card_id):
@@ -65,13 +55,30 @@ def estimate_remaining_time(start_epoch, num_completed, num_total):
     return estimated_seconds / 60
 
 
+def remove_similar(due_cards):
+    """
+    You don't want to practice an english->foreign and foreign->english version of the
+    same word on the same day.  It's kind of cheating, as it gives you too much of a reminder.
+    """
+    deduped = {}
+    for card in due_cards:
+        base_id = re.sub(r"._to_.", "", card["id"])
+        # Just overwrite the existing one if we ever get the same base id again
+        # This won't be foolproof if you practice later in another session,
+        # but, this scenario shouldn't happen too often anyways, except for words that you're
+        # having trouble learning that are stuck at an interval of around 1.
+        deduped[base_id] = card
+    return [card for key, card in deduped.items()]
+
+
 def main():
     start_epoch = int(time.time())
     words_file_path = sys.argv[1]
-    cards = from_cookie_jar(words_file_path)
+    cards = util.from_cookie_jar(words_file_path)
     candidate_ids = ["e_to_f" + x["id"] for x in cards]
     candidate_ids += ["f_to_e" + x["id"] for x in cards]
     due_cards = find_due_cards(candidate_ids)
+    due_cards = remove_similar(due_cards)
     random.shuffle(due_cards)
     word_counter = 0
     for due_card in due_cards:
