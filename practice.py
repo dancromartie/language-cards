@@ -115,11 +115,14 @@ def main():
             elif re.match(r"^r?\d+$", response):
                 practice_in_x_days = int(response.replace("r", ""))
                 interval = practice_in_x_days
-            elif re.match(r"^r?i+$", response):
+            elif re.match(r"^r?[di]+$", response):
                 if interval is None:
                     print("cant add to interval of None")
                     continue
-                interval += int(interval + response.count("i"))
+                interval += response.count("i")
+                interval -= response.count("d")
+                # Don't let it go 0 or negative
+                interval = max(1, interval)
                 practice_in_x_days = interval
             elif response == "w":
                 interval = 1

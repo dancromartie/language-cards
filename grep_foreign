@@ -1,0 +1,11 @@
+#!/usr/bin/env python
+
+import re
+import sys
+import util
+
+search_pattern = sys.argv[1]
+cards = util.from_cookie_jar(sys.argv[2])
+for card in cards:
+    if re.search(search_pattern, card["foreign"]):
+        print(card)
