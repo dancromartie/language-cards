@@ -1,3 +1,4 @@
+import argparse
 import collections
 import csv
 import random
@@ -92,6 +93,9 @@ def main():
         print("Word %s of %s" % (word_counter, len(due_cards)))
         print("Due id: %s, Base id: %s, Interval: %s" % (due_id, base_id, due_card["interval"]))
         direction = re.search("(\w_to_\w)", due_id).group(1)
+        if cli_args.direction:
+            direction = cli_args.direction
+        assert direction in ["e_to_f", "f_to_e"]
         # "due_card" so far was just from the practice logs,
         # This is the full fetch now.
         full_card = get_card_by_id(cards, base_id)
@@ -142,6 +146,10 @@ def clean_due_dates():
 
 if __name__ == "__main__":
     try:
+        parser = argparse.ArgumentParser()
+        parser.add_argument("--direction", choices=['e_to_f', 'f_to_e'])
+        parser.add_argument("file")
+        cli_args = parser.parse_args()
         main()
     finally:
         clean_due_dates()
