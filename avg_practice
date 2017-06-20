@@ -1,0 +1,25 @@
+#!/usr/bin/env python
+
+import csv
+from datetime import datetime, time, timedelta
+import json
+
+with open("drill_log.txt") as f_in:
+    reader = csv.DictReader(f_in, fieldnames=["id", "epoch", "interval"])
+    drills = list(reader)
+
+upcoming_midnight = datetime.combine(datetime.now(), time.min) + timedelta(days=1)
+decrementer = 100
+window_size = 30
+
+while decrementer >= 0:
+    current_day_pretend = upcoming_midnight - timedelta(days=decrementer)
+    max_epoch = current_day_pretend.timestamp()
+    min_epoch = (current_day_pretend - timedelta(days=window_size)).timestamp()
+    cards_practiced = 0
+    for drill in drills:
+        if min_epoch <= int(drill["epoch"]) <= max_epoch:
+            cards_practiced += 1
+    average = cards_practiced * 1.0 / window_size
+    print("%s day average as of %s: %s" % (window_size, current_day_pretend, average))
+    decrementer -= 1
