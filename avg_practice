@@ -10,7 +10,7 @@ with open("drill_log.txt") as f_in:
 
 upcoming_midnight = datetime.combine(datetime.now(), time.min) + timedelta(days=1)
 decrementer = 100
-window_size = 30
+window_size = 50
 
 while decrementer >= 0:
     current_day_pretend = upcoming_midnight - timedelta(days=decrementer)
