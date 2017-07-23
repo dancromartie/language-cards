@@ -43,6 +43,12 @@ def add_due_date_to_file(due_id, due_epoch, interval):
         f_out.write(due_date_string)
 
 
+def add_lateness_info_to_file(due_id, days_overdue, interval):
+    due_date_string = "%s %.2f %s\n" % (due_id, days_overdue, interval)
+    with open("lateness_stats", "a") as f_out:
+        f_out.write(due_date_string)
+
+
 def log_answer(due_id, interval):
     with open("drill_log.txt", "a") as f_out:
         f_out.write("%s,%s,%s\n" % (due_id, int(time.time()), interval))
@@ -90,8 +96,10 @@ def main():
             remaining_time_estimate = estimate_remaining_time(
                 start_epoch, word_counter - 1, len(due_cards))
             print("Estimated total practice time: %.1f mins" % remaining_time_estimate)
+        days_overdue = (int(time.time()) - int(due_card["due_date"])) / 86400
         print("Word %s of %s" % (word_counter, len(due_cards)))
-        print("Due id: %s, Base id: %s, Interval: %s" % (due_id, base_id, due_card["interval"]))
+        print("Due id: %s, Base id: %s, Interval: %s, Due %0.2f days ago" %
+            (due_id, base_id, due_card["interval"], days_overdue))
         direction = re.search("(\w_to_\w)", due_id).group(1)
         if cli_args.direction:
             direction = cli_args.direction
@@ -128,15 +136,22 @@ def main():
                 # Don't let it go 0 or negative
                 interval = max(1, interval)
                 practice_in_x_days = interval
+            elif re.match(r"^ra$", response):
+                # "aggressive" mode
+                interval += int(days_overdue)
+                practice_in_x_days = interval
             elif response == "w":
                 interval = 1
-                practice_in_x_days = interval
+                # IMPORTANT: 1/3 day if wrong, i.e. need to review later in day,
+                # or early next day
+                practice_in_x_days = .33333333
             else:
                 print("Bad characters")
                 continue
         assert 0 <= practice_in_x_days <= 100
-        due_epoch = int(time.time()) + int(practice_in_x_days) * 86400
+        due_epoch = int(int(time.time()) + float(practice_in_x_days) * 86400)
         add_due_date_to_file(due_id, due_epoch, interval)
+        add_lateness_info_to_file(due_id, days_overdue, interval)
         log_answer(due_id, interval)
 
 
