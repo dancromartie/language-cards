@@ -1,0 +1,42 @@
+<style type='text/css'>
+button[name=increment]{
+    margin: 50;
+}
+button[name=interval]{
+    margin: 50;
+}
+button{
+    height: 10em;
+}
+
+body{
+    font-size: 3em;
+}
+</style>
+
+<div>
+    <span id='question'>
+    {{ card["question"] }}
+    </span>
+
+    --- 
+
+    <span id='answer' style='display: none'>
+    {{ card["answer"] }}
+    </span>
+</div>
+
+<div>
+<button id='show-button' onclick='document.getElementById("answer").style.display = ""'>
+show
+</button>
+</div>
+
+<form id='form' method='POST'>
+    <input name='card-id' type='hidden' value='{{ card["orig_id"] }}'>
+    <input name='interval' type='hidden' value='{{ card["interval"] }}'>
+    <button type='submit' name='increment' value='w'>W</button>
+    <button type='submit' name='increment' value='3'>+ 3</button>
+    <button type='submit' name='increment' value='5'>+ 5</button>
+    <button type='submit' name='increment' value='10'>+ 10</button>
+</form>

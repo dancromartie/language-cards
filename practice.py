@@ -1,6 +1,7 @@
 import argparse
 import collections
 import csv
+import math
 import random
 import re
 import subprocess
@@ -43,8 +44,8 @@ def add_due_date_to_file(due_id, due_epoch, interval):
         f_out.write(due_date_string)
 
 
-def add_lateness_info_to_file(due_id, days_overdue, interval):
-    due_date_string = "%s %.2f %s\n" % (due_id, days_overdue, interval)
+def add_lateness_info_to_file(due_id, days_overdue, orig_interval, practice_in_x_days):
+    due_date_string = "%s %.2f %s %s\n" % (due_id, days_overdue, orig_interval, practice_in_x_days)
     with open("lateness_stats", "a") as f_out:
         f_out.write(due_date_string)
 
@@ -113,6 +114,7 @@ def main():
             print("English: %s" % full_card["english"])
 
         interval = due_card["interval"]
+        orig_interval = interval
         assert interval is None or interval < 300
 
         practice_in_x_days = None
@@ -138,7 +140,7 @@ def main():
                 practice_in_x_days = interval
             elif re.match(r"^ra$", response):
                 # "aggressive" mode
-                interval += int(days_overdue)
+                interval += math.ceil(days_overdue)
                 practice_in_x_days = interval
             elif response == "w":
                 interval = 1
@@ -148,10 +150,10 @@ def main():
             else:
                 print("Bad characters")
                 continue
-        assert 0 <= practice_in_x_days <= 100
+        assert 0 <= practice_in_x_days <= 1000
         due_epoch = int(int(time.time()) + float(practice_in_x_days) * 86400)
         add_due_date_to_file(due_id, due_epoch, interval)
-        add_lateness_info_to_file(due_id, days_overdue, interval)
+        add_lateness_info_to_file(due_id, days_overdue, orig_interval, practice_in_x_days)
         log_answer(due_id, interval)
 
 
