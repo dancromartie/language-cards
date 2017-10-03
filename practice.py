@@ -85,7 +85,9 @@ def main():
     cards = util.from_cookie_jar(words_file_path)
     candidate_ids = ["e_to_f" + x["id"] for x in cards]
     candidate_ids += ["f_to_e" + x["id"] for x in cards]
-    due_cards = find_due_cards(candidate_ids)
+    recently_drilled_ids = util.get_recently_drilled("drill_log.txt")
+    deduped_ids = util.remove_similar(candidate_ids, recently_drilled_ids)
+    due_cards = find_due_cards(deduped_ids)
     due_cards = remove_similar(due_cards)
     random.shuffle(due_cards)
     word_counter = 0

@@ -1,3 +1,4 @@
+from datetime import datetime
 import json
 import random
 import re
@@ -45,11 +46,17 @@ def page():
 
 
 def get_a_card():
-    words_file_path = "chinese_words"
+    minute = datetime.now().minute
+    minute_ranges = [(0, 10), (11, 20), (21, 30), (31, 40), (41, 50), (51, 60)] 
+    for i, x in enumerate(minute_ranges):
+        if x[0] <= minute <= x[1]:
+            words_file_path = ["chinese_words", "arabic_words"][i % 2]
     cards = util.from_cookie_jar(words_file_path)
     candidate_ids = ["e_to_f" + x["id"] for x in cards]
     candidate_ids += ["f_to_e" + x["id"] for x in cards]
-    due_cards = practice.find_due_cards(candidate_ids)
+    ids_recently_drilled = util.get_recently_drilled("drill_log.txt")
+    deduped_ids = util.remove_similar(candidate_ids, ids_recently_drilled)
+    due_cards = practice.find_due_cards(deduped_ids)
     if not due_cards:
         return "nothing to practice"
 
