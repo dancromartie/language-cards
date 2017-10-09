@@ -132,13 +132,14 @@ def main():
                 practice_in_x_days = int(response.replace("r", ""))
                 interval = practice_in_x_days
             elif re.match(r"^r?[di]+$", response):
-                if interval is None:
-                    print("cant add to interval of None")
-                    continue
                 interval += response.count("i")
                 interval -= response.count("d")
                 # Don't let it go 0 or negative
                 interval = max(1, interval)
+                practice_in_x_days = interval
+            elif re.match(r"ri(\d+)$", response):
+                bump_size = int(re.match(r"ri(\d+)$", response).group(1))
+                interval += bump_size
                 practice_in_x_days = interval
             elif re.match(r"^ra$", response):
                 # "aggressive" mode

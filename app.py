@@ -13,8 +13,8 @@ import util
 webapp = Flask(__name__)
 
 
-@webapp.route("/language", methods=["POST", "GET"])
-def page():
+@webapp.route("/language/<language>", methods=["POST", "GET"])
+def page(language):
     if request.method == "POST":
         submitted_increment = request.form["increment"]
         submitted_interval = request.form["interval"]
@@ -33,7 +33,7 @@ def page():
         subprocess.call(["python", "clean_due_dates.py"])
         time.sleep(1)
 
-    card = get_a_card()
+    card = get_a_card(language)
     if card == "nothing to practice":
         return "nothing to practice"
     if card["direction"] == "e_to_f":
@@ -45,12 +45,8 @@ def page():
     return render_template("single_question.html", card=card)
 
 
-def get_a_card():
-    minute = datetime.now().minute
-    minute_ranges = [(0, 10), (11, 20), (21, 30), (31, 40), (41, 50), (51, 60)] 
-    for i, x in enumerate(minute_ranges):
-        if x[0] <= minute <= x[1]:
-            words_file_path = ["chinese_words", "arabic_words"][i % 2]
+def get_a_card(language):
+    words_file_path = "%s_words" % language
     cards = util.from_cookie_jar(words_file_path)
     candidate_ids = ["e_to_f" + x["id"] for x in cards]
     candidate_ids += ["f_to_e" + x["id"] for x in cards]
